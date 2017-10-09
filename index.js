@@ -4,6 +4,7 @@ require('dotenv').config();
 const nodeHttp = require('http');
 const nodeHttps = require('https');
 const log = require('debug')('[request-promise]');
+log.log = console.log.bind(console);
 const error = require('debug')('[request-promise] Error:');
 const httpsProxyAgent = require('https-proxy-agent'); 
 
