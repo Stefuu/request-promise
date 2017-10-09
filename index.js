@@ -29,7 +29,7 @@ exports.http = (url, method, data, useragent, port) => {
             domain = url.replace(/(^[^/]+).*/,'$1');
         }
 
-        log(`[request-promise] http ${method} ${url}`);
+        log(`http ${method} ${url}`);
 
         let options;
         if( process.env.PROXY_HOST ){
@@ -64,6 +64,17 @@ exports.http = (url, method, data, useragent, port) => {
         let req = nodeHttp.request(options, res => {
             res.setEncoding('utf8');
             let body = '';
+
+            switch(res.statusCode){
+                case 500 :
+                    req.abort();
+                    return reject('500 Internal Server Error');
+                break;
+                case 404 :
+                    req.abort();
+                    return reject('404 Not Found');
+                break;
+            }
 
             res.on('data', chunk => {          
                 body += chunk;
@@ -111,7 +122,7 @@ exports.https = (url, method, data, useragent, port) => {
             domain = url.replace(/(^[^/]+).*/,'$1');
         }
 
-        log(`[request-promise] https ${method} ${url}`);      
+        log(`https ${method} ${url}`);      
 
         let options;
         if(method == 'GET'){    
@@ -151,6 +162,17 @@ exports.https = (url, method, data, useragent, port) => {
 
         let req = nodeHttps.request(options, res => {
             res.setEncoding('utf8');
+            
+            switch(res.statusCode){
+                case 500 :
+                    req.abort();
+                    return reject('500 Internal Server Error');
+                break;
+                case 404 :
+                    req.abort();
+                    return reject('404 Not Found');
+                break;
+            }
 
             let body = '';
             res.on('data', chunk => {          
@@ -161,7 +183,7 @@ exports.https = (url, method, data, useragent, port) => {
         });
 
         req.on('error', e => {
-            error(`\n[request-promise] Erro em request https ${method} URL: ${url}, DOMAIN: ${domain}, PATH: ${path}\n`);
+            error(`\nErro em request https ${method} URL: ${url}, DOMAIN: ${domain}, PATH: ${path}\n`);
             req.abort();
             return reject(e);
         });
